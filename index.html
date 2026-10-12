@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PokerCalc — Calculadora de Probabilidades Texas Hold'em</title>
+  <meta name="description" content="Calculadora gratuita de probabilidades para Texas Hold'em. Calcule outs, equidade e chances de vitória sem IA, sem backend e sem cadastro." />
+  <meta name="robots" content="index, follow" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ─── Header ──────────────────────────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <span class="logo-icon">♠</span>
+      <span class="logo-text">Poker<span>Calc</span></span>
+    </a>
+    <span class="header-badge">Texas Hold'em</span>
+    <div class="header-actions">
+      <button id="btn-tests" class="btn btn-ghost" title="Executar testes de validação do motor">
+        ⚗️ Testes
+      </button>
+      <button id="btn-reset" class="btn btn-secondary">
+        ↺ Limpar
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ─── Main Layout ──────────────────────────────────────────────────────────── -->
+<main class="main-container">
+
+  <!-- ─── Coluna Esquerda (entrada) ─────────────────────────────────────────── -->
+  <aside class="left-col">
+
+    <!-- Painel: Mesa -->
+    <div class="panel">
+      <div class="stage-indicator">
+        <div class="stage-step active" id="stage-preflop">Pré-Flop</div>
+        <div class="stage-step" id="stage-flop">Flop</div>
+        <div class="stage-step" id="stage-turn">Turn</div>
+        <div class="stage-step" id="stage-river">River</div>
+      </div>
+
+      <div class="panel-body">
+        <div class="felt-area">
+          <!-- Suas cartas -->
+          <div class="felt-section-label">Suas cartas</div>
+          <div class="card-row" id="hole-cards-row">
+            <!-- renderizado pelo JS -->
+          </div>
+
+          <!-- Cartas comunitárias -->
+          <div class="felt-section-label" style="margin-top:0.75rem">Cartas comunitárias</div>
+          <div class="card-row" id="community-cards-row">
+            <!-- renderizado pelo JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Painel: Seletor de Carta -->
+    <div class="card-picker" id="card-picker">
+      <div class="picker-header">
+        <span class="picker-title">Selecione uma carta</span>
+        <span class="picker-target" id="picker-target-label">—</span>
+      </div>
+      <div class="picker-suits" id="picker-suit-tabs">
+        <!-- tabs renderizados pelo JS -->
+      </div>
+      <div class="picker-grid" id="picker-grid">
+        <!-- grid renderizado pelo JS -->
+      </div>
+    </div>
+
+    <!-- Painel: Oponentes -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span class="panel-title-icon">👥</span>
+          Oponentes
+        </span>
+      </div>
+      <div class="panel-body">
+        <div class="opponents-selector">
+          <span class="opponents-label">Quantidade de adversários:</span>
+          <div class="opponents-buttons" id="opponents-buttons">
+            <!-- botões renderizados pelo JS -->
+          </div>
+        </div>
+        <div style="margin-top:0.6rem;font-size:0.7rem;color:var(--text-muted)">
+          As cartas dos adversários são desconhecidas. O cálculo considera todas as distribuições válidas.
+        </div>
+      </div>
+    </div>
+
+    <!-- Botão principal -->
+    <div>
+      <button id="btn-calculate" class="btn btn-primary-lg">
+        🔢 Calcular probabilidades
+      </button>
+      <button id="btn-cancel" class="btn btn-danger" style="display:none;width:100%;margin-top:0.5rem;justify-content:center">
+        ✕ Cancelar simulação
+      </button>
+    </div>
+
+    <!-- Progresso Monte Carlo -->
+    <div id="mc-progress-container" style="display:none" class="mc-progress">
+      <div class="mc-progress-text">
+        <span>Simulações: <strong id="mc-completed">0</strong> / <strong id="mc-total">0</strong></span>
+        <span>Calculando...</span>
+      </div>
+      <div class="mc-progress-bar-wrap">
+        <div class="mc-progress-bar" id="mc-progress-bar"></div>
+      </div>
+    </div>
+
+    <!-- Legenda dos naipes -->
+    <div style="display:flex;gap:1rem;justify-content:center;padding:0.5rem 0;font-size:0.85rem">
+      <span style="color:var(--red-suit)">♥ ♦ Vermelho</span>
+      <span style="color:var(--black-suit)">♠ ♣ Preto</span>
+    </div>
+
+  </aside>
+
+  <!-- ─── Coluna Direita (resultados) ───────────────────────────────────────── -->
+  <section class="right-col" id="results-area">
+    <!-- renderizado pelo JS -->
+  </section>
+
+</main>
+
+<!-- ─── Modal de Testes ──────────────────────────────────────────────────────── -->
+<div id="tests-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border)">
+      <span style="font-weight:700;font-size:0.95rem">⚗️ Testes de Validação do Motor</span>
+      <button id="close-tests" class="btn btn-ghost" style="padding:0.25rem 0.5rem">✕</button>
+    </div>
+    <div id="tests-body" style="padding:1.25rem;overflow-y:auto;flex:1">
+      <!-- preenchido pelo JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ─── Footer ───────────────────────────────────────────────────────────────── -->
+<footer>
+  <p>PokerCalc — Calculadora de Probabilidades Texas Hold'em · Sem IA · Sem backend · Funciona offline</p>
+  <p style="margin-top:0.3rem">Todos os cálculos são executados localmente no navegador.</p>
+</footer>
+
+<!-- ─── Scripts ──────────────────────────────────────────────────────────────── -->
+<script src="poker-engine.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
